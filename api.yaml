@@ -1,0 +1,571 @@
+swagger: '2.0'
+info:
+  title: melod API
+  description: Listen and shut up.
+  version: "1.0.0"
+schemes:
+  - http
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /artists:
+    get:
+      summary: List of artists.
+      description: |
+        This endpoint returns a list of available artists. This list may be
+        optionally sorted using the `sort` parameter, and optionally paginated
+        using the `artists_per_page` and `page` parameters.
+        
+        The `starts_with` option may also be used to return artists with names
+        starting with a given substring.
+      produces:
+        - application/json
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort results. Available values are:
+            
+              * `name` (default): artist name
+              * `rname`: artist name (reverse)
+              * `nalbums`: album count
+              * `rnalbums`: album count (reverse)
+          type: string
+          default: name
+          enum:
+            - name
+            - rname
+            - nalbums
+            - rnalbums
+        - name: artists_per_page
+          in: query
+          description: |
+            Number of artists per page when the `page` parameter is
+            also provided. Defaults to 20 artists/page.
+          type: integer
+          minimum: 1
+          default: 20
+        - name: page
+          in: query
+          description: |
+            Page number. When this option is absent, pagination is disabled.
+            The `artists_per_page` parameter determines how many artists are
+            returned per page. Page 0 is the first page.
+          type: integer
+          minimum: 0
+        - name: starts_with
+          in: query
+          description: |
+            Optional parameter to return artists with names starting with
+            this substring. The match is case insensitive.
+          type: string
+      responses:
+        200:
+          description: An array of artists
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Artist'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /artists/{id}:
+    get:
+      summary: Artist.
+      description: |
+        This endpoint returns a single artist based on its unique ID.
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Artist unique ID
+          required: true
+          type: string
+      responses:
+        200:
+          description: Artist
+          schema:
+            $ref: '#/definitions/Artist'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /artists/{id}/data:
+    get:
+      summary: Archive of artist's discography.
+      description: |
+        This endpoint returns an archive of the artist's available discography.
+      produces:
+        - application/zip
+        - application/x-gtar
+        - application/x-gzip
+      parameters:
+        - name: id
+          in: path
+          description: Artist unique ID
+          required: true
+          type: string
+        - name: preferred_audio_format
+          in: query
+          description: |
+            Preferred audio format, amongst:
+            
+              * `lossless`: any lossless format
+              * `lossy_max`: any lossy format, maximum quality
+              * `lossy_min`: any lossy format, minimum quality
+              * `flac`: FLAC format
+              * `mp3_max`: MP3, maximum quality
+              * `mp3_min`: MP3, minimum quality
+              * `mp3_vbr_max` (default): variable bitrate MP3, maximum quality
+              * `mp3_vbr_min`: variable bitrate MP3, minimum quality
+              * `mp3_cbr_max`: constant bitrate MP3, maximum quality
+              * `mp3_cbr_min`: constant bitrate MP3, minimum quality
+              * `ogg_max`: OGG, maximum quality
+              * `ogg_min`: OGG, minimum quality
+          type: string
+          default: mp3_vbr_max
+          enum:
+            - lossless
+            - lossy_max
+            - lossy_min
+            - flac
+            - mp3_max
+            - mp3_min
+            - mp3_vbr_max
+            - mp3_vbr_min
+            - mp3_cbr_max
+            - mp3_cbr_min
+            - ogg_max
+            - ogg_min
+        - name: preferred_archive_format
+          in: query
+          description: |
+            Preferred archive format, amongst:
+            
+              * `zip` (default): ZIP archive
+              * `tar`: tarball
+              * `tgz`: gzipped tarball
+          type: string
+          default: zip
+          enum:
+            - zip
+            - tar
+            - tgz
+      responses:
+        200:
+          description: Binary archive
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /albums:
+    get:
+      summary: List of albums.
+      description: |
+        This endpoint returns a list of available albums. This list may be
+        optionally sorted using the `sort` parameter, and optionally paginated
+        using the `albums_per_page` and `page` parameters.
+        
+        The `starts_with` option may also be used to return albums with names
+        starting with a given substring.
+      produces:
+        - application/json
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort results. Available values are:
+            
+              * `name` (default): album name
+              * `rname`: album name (reverse)
+              * `nsongs`: song count
+              * `rnsongs`: song count (reverse)
+          type: string
+          default: name
+          enum:
+            - name
+            - rname
+            - nsongs
+            - rnsongs
+        - name: albums_per_page
+          in: query
+          description: |
+            Number of albums per page when the `page` parameter is
+            also provided. Defaults to 20 albums/page.
+          type: integer
+          minimum: 1
+          default: 20
+        - name: page
+          in: query
+          description: |
+            Page number. When this option is absent, pagination is disabled.
+            The `albums_per_page` parameter determines how many albums are
+            returned per page. Page 0 is the first page.
+          type: integer
+          minimum: 0
+        - name: starts_with
+          in: query
+          description: |
+            Optional parameter to return albums with names starting with
+            this substring. The match is case insensitive.
+          type: string
+      responses:
+        200:
+          description: An array of albums
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Album'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /albums/{id}:
+    get:
+      summary: Album.
+      description: |
+        This endpoint returns a single album based on its unique ID.
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Album unique ID
+          required: true
+          type: string
+      responses:
+        200:
+          description: Album
+          schema:
+            $ref: '#/definitions/Album'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /albums/{id}/data:
+    get:
+      summary: Archive of album songs.
+      description: |
+        This endpoint returns an archive of the album's available songs.
+      produces:
+        - application/zip
+        - application/x-gtar
+        - application/x-gzip
+      parameters:
+        - name: id
+          in: path
+          description: Album unique ID
+          required: true
+          type: string
+        - name: preferred_audio_format
+          in: query
+          description: |
+            Preferred audio format, amongst:
+            
+              * `lossless`: any lossless format
+              * `lossy_max`: any lossy format, maximum quality
+              * `lossy_min`: any lossy format, minimum quality
+              * `flac`: FLAC format
+              * `mp3_max`: MP3, maximum quality
+              * `mp3_min`: MP3, minimum quality
+              * `mp3_vbr_max` (default): variable bitrate MP3, maximum quality
+              * `mp3_vbr_min`: variable bitrate MP3, minimum quality
+              * `mp3_cbr_max`: constant bitrate MP3, maximum quality
+              * `mp3_cbr_min`: constant bitrate MP3, minimum quality
+              * `ogg_max`: OGG, maximum quality
+              * `ogg_min`: OGG, minimum quality
+          type: string
+          default: mp3_vbr_max
+          enum:
+            - lossless
+            - lossy_max
+            - lossy_min
+            - flac
+            - mp3_max
+            - mp3_min
+            - mp3_vbr_max
+            - mp3_vbr_min
+            - mp3_cbr_max
+            - mp3_cbr_min
+            - ogg_max
+            - ogg_min
+        - name: preferred_archive_format
+          in: query
+          description: |
+            Preferred archive format, amongst:
+            
+              * `zip` (default): ZIP archive
+              * `tar`: tarball
+              * `tgz`: gzipped tarball
+          type: string
+          default: zip
+          enum:
+            - zip
+            - tar
+            - tgz
+      responses:
+        200:
+          description: Binary archive
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /songs:
+    get:
+      summary: List of songs.
+      description: |
+        This endpoint returns a list of available songs. This list may be
+        optionally sorted using the `sort` parameter, and optionally paginated
+        using the `songs_per_page` and `page` parameters.
+        
+        The `starts_with` option may also be used to return songs with titles
+        starting with a given substring.
+      produces:
+        - application/json
+      parameters:
+        - name: sort
+          in: query
+          description: |
+            Sort results. Available values are:
+            
+              * `title` (default): song title
+              * `rtitle`: song title (reverse)
+          type: string
+          default: name
+          enum:
+            - name
+            - rname
+        - name: songs_per_page
+          in: query
+          description: |
+            Number of songs per page when the `page` parameter is
+            also provided. Defaults to 20 songs/page.
+          type: integer
+          minimum: 1
+          default: 20
+        - name: page
+          in: query
+          description: |
+            Page number. When this option is absent, pagination is disabled.
+            The `songs_per_page` parameter determines how many songs are
+            returned per page. Page 0 is the first page.
+          type: integer
+          minimum: 0
+        - name: starts_with
+          in: query
+          description: |
+            Optional parameter to return songs with titles starting with
+            this substring. The match is case insensitive.
+          type: string
+      responses:
+        200:
+          description: An array of songs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Song'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /songs/{id}:
+    get:
+      summary: Song.
+      description: |
+        This endpoint returns a single song based on its unique ID.
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Song unique ID
+          required: true
+          type: string
+      responses:
+        200:
+          description: Song
+          schema:
+            $ref: '#/definitions/Song'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /songs/{id}/data:
+    get:
+      summary: Song's audio data.
+      description: |
+        This endpoint returns a song's audio data.
+      produces:
+        - audio/mpeg3
+        - audio/x-mpeg3
+        - audio/mpeg-url
+        - audio/x-mpeg-url
+        - audio/x-ogg
+        - audio/flac
+      parameters:
+        - name: id
+          in: path
+          description: Song unique ID
+          required: true
+          type: string
+        - name: preferred_audio_format
+          in: query
+          description: |
+            Preferred audio format, amongst:
+            
+              * `lossless`: any lossless format
+              * `lossy_max`: any lossy format, maximum quality
+              * `lossy_min`: any lossy format, minimum quality
+              * `flac`: FLAC format
+              * `mp3_max`: MP3, maximum quality
+              * `mp3_min`: MP3, minimum quality
+              * `mp3_vbr_max` (default): variable bitrate MP3, maximum quality
+              * `mp3_vbr_min`: variable bitrate MP3, minimum quality
+              * `mp3_cbr_max`: constant bitrate MP3, maximum quality
+              * `mp3_cbr_min`: constant bitrate MP3, minimum quality
+              * `ogg_max`: OGG, maximum quality
+              * `ogg_min`: OGG, minimum quality
+          type: string
+          default: mp3_vbr_max
+          enum:
+            - lossless
+            - lossy_max
+            - lossy_min
+            - flac
+            - mp3_max
+            - mp3_min
+            - mp3_vbr_max
+            - mp3_vbr_min
+            - mp3_cbr_max
+            - mp3_cbr_min
+            - ogg_max
+            - ogg_min
+      responses:
+        200:
+          description: Binary audio file
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Artist:
+    description: An artist
+    required:
+      - id
+      - name
+      - album_ids
+    properties:
+      id:
+        type: string
+        description: Artist unique ID
+      name:
+        type: string
+        description: Artist name
+      album_ids:
+        type: array
+        description: Album IDs
+        items:
+          type: string
+      image_url:
+        type: string
+        description: URL of artist image
+  Album:
+    description: An album
+    required:
+      - artist_id
+      - id
+      - name
+      - song_ids
+    properties:
+      artist_id:
+        type: string
+        description: ID of artist to which this album belongs
+      id:
+        type: string
+        description: Album unique ID
+      name:
+        type: string
+        description: Album name
+      song_ids:
+        type: array
+        description: Song IDs
+        items:
+          type: string
+      image_url:
+        type: string
+        description: URL of artist image
+      year:
+        type: integer
+        description: Year of release
+      genres:
+        type: array
+        description: Genres
+        items:
+          type: string
+      length:
+        type: integer
+        description: Length of album, in seconds
+      label:
+        type: string
+        description: Record label name
+      producer:
+        type: string
+        description: Producer name
+  Song:
+    description: A song
+    required:
+      - artist_id
+      - album_id
+      - id
+      - title
+    properties:
+      artist_id:
+        type: string
+        description: ID of artist to which this song belongs
+      album_id:
+        type: string
+        description: ID of album to which this song belongs
+      id:
+        type: string
+        description: Song unique ID
+      title:
+        type: string
+        description: Song title
+      track:
+        type: integer
+        minimum: 1
+        description: Track number
+      disc:
+        type: integer
+        minimum: 1
+        description: Disc number
+      composer:
+        type: string
+        description: Composer
+      copyright:
+        type: string
+        description: Copyright notice
+      genres:
+        type: array
+        description: Genres
+        items:
+          type: string
+  Error:
+    description: An error
+    required:
+      - code
+      - name
+    properties:
+      code:
+        type: number
+        description: Error code
+      name:
+        type: string
+        description: Error name
+      description:
+        type: string
+        description: Error description
