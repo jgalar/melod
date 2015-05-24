@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: melod API
-  description: Listen and shut up.
+  description: Shut up and listen.
   version: "1.0.0"
 schemes:
   - http
