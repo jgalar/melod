@@ -23,7 +23,7 @@ class Artists(restful.Resource):
         args = self.parser.parse_args()
         print(args)
         # Return a list of available artists
-        return {'artists': str(range(42))}
+        return {'artists': list(range(5))}
 
 
 api.add_resource(Artists, '/artists')
